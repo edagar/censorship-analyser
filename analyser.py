@@ -5,7 +5,7 @@ from time import sleep
 from random import randint, choice
 
 
-OONI_BINARY = " "  # Path to ooniprobe binary. 
+OONI_BINARY = "/home/analyser/ooni-probe/bin/ooniprobe"  # Path to ooniprobe binary. 
 PROBE_TEST = "siteprobe.py"
 DNS_TEST = "dnscompare.py"
 TCP_TEST = "tcpconnect.py"
@@ -72,7 +72,6 @@ def probeTorSite():
         print "Tor site reachable"
          
 def probeDirectoryAuthorities():
-    reachable = False
     for server in TOR_DIRECTORY_AUTHORITIES:
         host = server.keys()[0]
         port = server[host] 
@@ -80,16 +79,15 @@ def probeDirectoryAuthorities():
 
         if "Site reachable" in analyser.probeSite(["-u", url]):
             print "Consensus successfully fetched"
-            reachable = True
-            break
+            return
 
-    if not reachable:
-        print "Failed to fetch consensus - running tests"
-        tests = [ 
-                { PING_TEST: ["-f", "directory_authorities.txt"] },
-                { TRACEROUTE_TEST : ["-f", "directory_authorities.txt"] }
-                ]
-        runTests(tests)
+    print "Failed to fetch consensus - running tests"
+    tests = [ 
+            { PING_TEST: ["-f", "directory_authorities.txt"] },
+            { TRACEROUTE_TEST : ["-f", "directory_authorities.txt"] }
+            ]
+
+    runTests(tests)
 
 def makeURL(host, port):
     if port == 80: 
