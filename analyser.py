@@ -5,6 +5,7 @@ from time import sleep
 from random import randint, choice
 
 
+SLEEP_INTERVAL = (1, 25)  # Interval for random sleep periods between tests.
 OONI_BINARY = "/home/analyser/ooni-probe/bin/ooniprobe"  # Path to ooniprobe binary. 
 PROBE_TEST = "siteprobe.py"
 DNS_TEST = "dnscompare.py"
@@ -52,20 +53,27 @@ class Analyser():
     def compareDNS(self, args):
         return self.runTest(DNS_TEST, args)
         
-    def testTCPConnection(self):
+    def testTCPConnection(self, args):
         return self.runTest(TCP_TEST, [])
     
     def ping(self, argv):
-        return self.runTest(ICMP_TEST, argv)
-        
+        return self.runTest(PING_TEST, argv)
+
+    def traceroute(self, args):
+        return self.runTest(TRACEROUTE_TEST, args)
+
+    def siteReachable(self, url):
+        return "Site reachable" in self.probeSite(["-u", url])
+    
+
 def probeTorSite():
-    if not "Site reachable" in analyser.probeSite([]):
+    if not analyser.siteReachable("https://www.torproject.org"):
         print "Tor site not reachable - running tests"
         tests = [
-                    { TCP_TEST: ["-t", "bridges.torproject.org"] },
-                    {  DNS_TEST: [] },
-                    {  PROBE_TEST: ["-u", choice(TOR_MIRRORS)] },
-                    {  TCP_TEST: [] }
+                    {  analyser.testTCPConnection: ["-t", "bridges.torproject.org"] },
+                    {  analyser.compareDNS: [] },
+                    {  analyser.probeSite: ["-u", choice(TOR_MIRRORS)] },
+                    {  analyser.testTCPConnection: [] }
                 ]
         runTests(tests)
     else:
@@ -77,14 +85,14 @@ def probeDirectoryAuthorities():
         port = server[host] 
         url = makeURL(host, port)
 
-        if "Site reachable" in analyser.probeSite(["-u", url]):
+        if analyser.siteReachable(url):
             print "Consensus successfully fetched"
             return
 
     print "Failed to fetch consensus - running tests"
     tests = [ 
-            { PING_TEST: ["-f", "directory_authorities.txt"] },
-            { TRACEROUTE_TEST : ["-f", "directory_authorities.txt"] }
+                { analyser.ping: ["-f", "directory_authorities.txt"] },
+                { analyser.traceroute: ["-f", "directory_authorities.txt"] }
             ]
 
     runTests(tests)
@@ -101,8 +109,8 @@ def makeURL(host, port):
 def runTests(tests):
     for x in range(len(tests)):
         test, args = randPop(tests)
-        analyser.runTest(test, args)
-        sleep(randint(1, 20))
+        test(args)
+        sleep(randint(SLEEP_INTERVAL[0], SLEEP_INTERVAL[1]))
     
 def randPop(tests):
     t = choice(tests)
