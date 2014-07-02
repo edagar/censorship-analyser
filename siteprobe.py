@@ -49,8 +49,10 @@ class WebsiteProbe(httpt.HTTPTest):
             
         if not response:
             log.err("Site unreachable")
+            log.err("status: FAILED")
             self.report['Site_reachable'] = "No"
  
         else:
             log.msg("Site reachable")
+            log.msg("status: OK ")
             self.report['Site_reachable'] = "Yesk"

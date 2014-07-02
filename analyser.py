@@ -3,6 +3,7 @@
 import subprocess
 from time import sleep
 from random import randint, choice
+from test import Test, TestCase
 
 
 SLEEP_INTERVAL = (1, 25)  # Interval for random sleep periods between tests.
@@ -121,5 +122,10 @@ def randPop(tests):
 
 if __name__ == "__main__":
     analyser = Analyser()
-    probeTorSite()               
-    probeDirectoryAuthorities()
+    tests = TestCase()
+    tests.addTests( [Test(TCP_TEST, [], OONI_BINARY)])
+    tests.addTests( [Test(PROBE_TEST, [], OONI_BINARY)])
+    tests.run()
+    tests.verifyResults()
+    #probeTorSite()               
+    #probeDirectoryAuthorities()
