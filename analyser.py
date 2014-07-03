@@ -6,7 +6,7 @@ from random import randint, choice
 
 
 SLEEP_INTERVAL = (1, 25)  # Interval for random sleep periods between tests.
-OONI_BINARY = "/home/analyser/ooni-probe/bin/ooniprobe"  # Path to ooniprobe binary. 
+OONI_BINARY = "ooniprobe"
 PROBE_TEST = "siteprobe.py"
 DNS_TEST = "dnscompare.py"
 TCP_TEST = "tcpconnect.py"
