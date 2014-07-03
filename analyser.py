@@ -6,7 +6,7 @@ from random import randint, choice
 
 
 SLEEP_INTERVAL = (1, 25)  # Interval for random sleep periods between tests.
-OONI_BINARY = "/home/analyser/ooni-probe/bin/ooniprobe"  # Path to ooniprobe binary. 
+OONI_BINARY = "ooniprobe"
 PROBE_TEST = "siteprobe.py"
 DNS_TEST = "dnscompare.py"
 TCP_TEST = "tcpconnect.py"
@@ -14,24 +14,15 @@ PING_TEST = "ping.py"
 TRACEROUTE_TEST = "traceroute.py"
 TOR_MIRRORS = ["https://www.unicorncloud.org/public/torproject.org/", "https://mirror.ml/tor/", "https://www.oignon.net/", "https://tor.hackthissite.org/"]
 TOR_DIRECTORY_AUTHORITIES = [
-                             { "86.59.21.38": 80 },
-                             { "86.59.21.38": 443 },
-                             { "76.73.17.194": 9030 },
-                             { "76.73.17.194": 9090 },
-                             { "171.25.193.9": 443 },
-                             { "171.25.193.9": 80 },
-                             { "dannenberg.ccc.de": 80 },
-                             { "193.23.244.244": 443 },
-                             { "208.83.223.34": 443 }, 
-                             { "208.83.223.34": 80 },
                              { "128.31.0.34": 9131 },
-                             { "128.31.0.34": 9101 },
+                             { "86.59.21.38": 80 },
                              { "194.109.206.212": 80 },
-                             { "194.109.206.212": 443 },
+                             { "76.73.17.194": 9030 },
                              { "212.112.245.170": 80 },
-                             { "212.112.245.170": 443 },
+                             { "193.23.244.244": 80 },
+                             { "208.83.223.34": 443 }, 
+                             { "171.25.193.9": 443 },
                              { "154.35.32.5": 80 },
-                             { "154.35.32.5": 443 }
                             ]
 
 class Analyser():
