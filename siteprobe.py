@@ -45,14 +45,15 @@ class WebsiteProbe(httpt.HTTPTest):
             response = yield self.doRequest(self.url, method="GET",
                 use_tor=False, headers=self.headers)
         except Exception, e:
+            log.msg("TestStatus: [ FAILED ]")
             log.exception(e)
-            
+            log.msg("TestException: [ %s ]" % e.message)
+
         if not response:
             log.err("Site unreachable")
-            log.err("status: FAILED")
             self.report['Site_reachable'] = "No"
  
         else:
             log.msg("Site reachable")
-            log.msg("status: OK ")
-            self.report['Site_reachable'] = "Yesk"
+            log.msg("TestStatus: [ OK ]")
+            self.report['Site_reachable'] = "Yes"
