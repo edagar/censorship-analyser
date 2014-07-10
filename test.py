@@ -29,6 +29,15 @@ class Test(object):
                 "ErrorMessage": self.errorMessage,
                 }
 
+class SiteProbe(Test):
+    def __init__(self, testfile="siteprobe.py", target="https://www.torproject.org"):
+        Test.__init__(self, testfile=testfile, args = ["-u", target])
+        self.target = target
+
+class TCPTest(Test):
+    def __init__(self, testfile="tcpconnect.py", target="www.torproject.org"):
+        Test.__init__(self, testfile=testfile, args=["-t", target])
+        self.target = target
 
 class TestParser(object):
     def __init__(self, test):
@@ -83,7 +92,7 @@ class TestCase(object):
 
     def verifyResults(self):
         for test in self.tests:
-            print test.status 
+            test.printResults()
 
 def runTest(test):
     binary = "ooniprobe"
