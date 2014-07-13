@@ -39,6 +39,23 @@ class TCPTest(Test):
         Test.__init__(self, testfile=testfile, args=["-t", target])
         self.target = target
 
+class PingTest(Test):
+    def __init__(self, testfile="ping.py",target=None, targetfile="directory_authorities.txt"):
+        args = ["-t", target] if target is not None else ["-f", targetfile]
+        Test.__init__(self, testfile=testfile, args=args)
+        self.target = target
+        self.packets = None
+
+    def parseResults(self):
+        self.parser = TestParser(self)
+        self.packets = self.parser.findValue("ReceivedPackets: ")
+        if "echo-reply" in self.packets:
+            self.status = "OK"
+        else:
+            self.status = "FAILED"
+            self.errorMessage = "Host unreachable"
+
+
 class TestParser(object):
     def __init__(self, test):
         self.test = test
