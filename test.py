@@ -93,33 +93,27 @@ class TestParser(object):
                 print "%s: %s" % (key, value)
 
 
-class TestCase(object):
+class TestCase(list):
     def __init__(self, tests=[], sleep_interval=(1,20)):
-        self.tests = tests
+        super(TestCase, self).__init__(tests)
         self.sleepInterval = sleep_interval
 
-    def addTests(self, tests):
-        self.tests += tests
-
-    def addTest(self, test):
-        self.tests.append(test)
-
     def run(self):
-        tests = list(self.tests)
-        for x in range(len(self.tests)):
-            test = self.randPop(tests)
+        tests = testCaseGenerator(list(self))
+        for test in tests:
             test.run()
             sleep(randint(self.sleepInterval[0], self.sleepInterval[1]))
 
-    def randPop(self, tests):
-        test = choice(tests)
-        tests.remove(test)
-        return test
-
     def printResults(self):
-        for test in self.tests:
+        for test in self:
             test.printResults()
             print
+
+def testCaseGenerator(seq):
+    for x in range(len(seq)):
+        test = choice(seq)
+        seq.remove(test)
+        yield test
 
 def runTest(test):
     binary = "ooniprobe"
