@@ -31,18 +31,18 @@ class Test(object):
 
 class SiteProbe(Test):
     def __init__(self, testfile="siteprobe.py", target="https://www.torproject.org"):
-        Test.__init__(self, testfile=testfile, args = ["-u", target])
+        super(SiteProbe, self).__init__(testfile=testfile, args = ["-u", target])
         self.target = target
 
 class TCPTest(Test):
     def __init__(self, testfile="tcpconnect.py", target="www.torproject.org"):
-        Test.__init__(self, testfile=testfile, args=["-t", target])
+        super(TCPTest, self).__init__(testfile=testfile, args=["-t", target])
         self.target = target
 
 class PingTest(Test):
     def __init__(self, testfile="ping.py",target=None, targetfile="directory_authorities.txt"):
         args = ["-t", target] if target is not None else ["-f", targetfile]
-        Test.__init__(self, testfile=testfile, args=args)
+        super(PingTest, self).__init__(testfile=testfile, args=args)
         self.target = target
         self.packets = None
 
