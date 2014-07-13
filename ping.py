@@ -10,7 +10,7 @@ class UsageOptions(usage.Options):
 class ICMPPing(scapyt.BaseScapyTest):
         usageOptions = UsageOptions
         inputFile = ['file', 'f', None,
-                 'Input file containing urls to probe']
+                 'Input file containing hosts to ping']
 
         def setUp(self):
             if self.input:
@@ -24,10 +24,16 @@ class ICMPPing(scapyt.BaseScapyTest):
             def finished(packets):
                 self.report['packets'] = packets
                 answered, unanswered = packets
+                stuff = []
                 for snd, rcv in answered:
-                    rcv.show()
+                    stuff.append(rcv)
+                log.msg("ReceivedPackets: [ %s ]" % stuff) 
+            def failed(failure):
+                log.msg("TestStatus: [ FAILED ]")
+                log.msg("TestException: [ %s ]" % failure.getErrorMessage() )
             self.report['target'] = self.target
             packets = IP(dst=self.target)/ICMP()
             d = self.sr(packets)
             d.addCallback(finished)
+            d.addErrback(failed)
             return d
