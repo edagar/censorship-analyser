@@ -55,6 +55,11 @@ class PingTest(Test):
             self.status = "FAILED"
             self.errorMessage = "Host unreachable"
 
+class DNSTest(Test):
+    def __init__(self, testfile="dnscompare.py", target="torproject.org"):
+        super(DNSTest, self).__init__(testfile=testfile, args=["-t", target])
+        self.target = target
+
 
 class TestParser(object):
     def __init__(self, test):
