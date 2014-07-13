@@ -6,7 +6,7 @@ from ooni.templates import dnst
 
 class UsageOptions(usage.Options):
     optParameters = [
-                     ['host', 'h', None, 'Specify a single hostname to query.'],
+                     ['target', 't', None, 'Specify a single hostname to query.'],
                      ['expected', 'e', None, 'Speficy file containing expected lookup results'],
                      ]
 
@@ -21,8 +21,8 @@ class DNSLookup(dnst.DNSTest):
         self.dns_servers = []
         if self.input:
             self.hostname = self.input
-        elif self.localOptions['host']:
-            self.hostname = self.localOptions['host']
+        elif self.localOptions['target']:
+            self.hostname = self.localOptions['target']
         else:
             self.hostname = "torproject.org"
 
@@ -64,9 +64,13 @@ class DNSLookup(dnst.DNSTest):
                 if self.verify_results(results):
                     self.report['dns_lookup_status'] = "success"
                     self.report['tampering_found'] = "false"
+                    log.msg("TestStatus: [ OK ]")
                 else:
                     self.report['dns_lookup_status'] = "warning"
                     self.report['tampering_found'] = "possibly"
+                    log.msg("TestStatus: [ FAILED ]")
+                    log.msg("TestException: [ unexpected results ]")
+                     
         
     @defer.inlineCallbacks
     def test_control_results(self):
