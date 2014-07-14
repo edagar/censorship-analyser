@@ -67,19 +67,25 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s: %s" % (port, report))
                 self.report['hops_'+str(port)].append(report)
+            log.msg("TestStatus: [ OK ]")
   
-        dl = []
-        max_ttl, timeout = self.max_ttl_and_timeout()
-        for port in self.dst_ports:
-            packets = IP(dst=self.localOptions['backend'],
+        try:
+            dl = []
+            max_ttl, timeout = self.max_ttl_and_timeout()
+            for port in self.dst_ports:
+                packets = IP(dst=self.localOptions['backend'],
                     ttl=(1,max_ttl),id=RandShort())/TCP(flags=0x2, dport=port,
                             sport=self.get_sport('tcp'))
   
-            d = self.sr(packets, timeout=timeout)
-            d.addCallback(finished, port)
-            dl.append(d)
-        return defer.DeferredList(dl)
-  
+                d = self.sr(packets, timeout=timeout)
+                d.addCallback(finished, port)
+            return defer.DeferredList(dl)
+
+        except Exception, e:
+            log.msg("TestStatus: [ FAILED ]")
+            log.exception(e)
+            log.msg("TestException: [ %s ]" % (e))
+
     def test_udp_traceroute(self):
         """
         Does a traceroute to the destination by sending UDP packets with empty
@@ -97,18 +103,26 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s: %s" % (port, report))
                 self.report['hops_'+str(port)].append(report)
-        dl = []
-        max_ttl, timeout = self.max_ttl_and_timeout()
-        for port in self.dst_ports:
-            packets = IP(dst=self.localOptions['backend'],
+        
+        try:
+            dl = []
+            max_ttl, timeout = self.max_ttl_and_timeout()
+            for port in self.dst_ports:
+                packets = IP(dst=self.localOptions['backend'],
                     ttl=(1,max_ttl),id=RandShort())/UDP(dport=port,
                             sport=self.get_sport('udp'))
   
-            d = self.sr(packets, timeout=timeout)
-            d.addCallback(finished, port)
-            dl.append(d)
-        return defer.DeferredList(dl)
-  
+                d = self.sr(packets, timeout=timeout)
+                d.addCallback(finished, port)
+                dl.append(d)
+            return defer.DeferredList(dl)
+
+        except Exception, e:
+            log.msg("TestStatus: [ FAILED ]")
+            log.exception(e)
+            log.msg("TestException: [ %s ]" % (e))
+
+
     def test_icmp_traceroute(self):
         """
         Does a traceroute to the destination by sending ICMP echo request
@@ -125,11 +139,19 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s" % (report))
                 self.report['hops'].append(report)
-        dl = []
-        max_ttl, timeout = self.max_ttl_and_timeout()
-        packets = IP(dst=self.localOptions['backend'],
+
+        try:
+            dl = []
+            max_ttl, timeout = self.max_ttl_and_timeout()
+            packets = IP(dst=self.localOptions['backend'],
                     ttl=(1,max_ttl), id=RandShort())/ICMP()
   
-        d = self.sr(packets, timeout=timeout)
-        d.addCallback(finished)
-        return d
+            d = self.sr(packets, timeout=timeout)
+            d.addCallback(finished)
+            return d
+        except Exception, e:
+            log.msg("TestStatus: [ FAILED ]")
+            log.exception(e)
+            log.msg("TestException: [ %s ]" % (e))
+
+
