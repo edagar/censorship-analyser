@@ -3,16 +3,17 @@
 import subprocess
 from time import sleep
 from random import randint, choice
-from test import Test, TestCase
-
+from test import *
 
 SLEEP_INTERVAL = (1, 25)  # Interval for random sleep periods between tests.
-OONI_BINARY = "/home/analyser/ooni-probe/bin/ooniprobe"  # Path to ooniprobe binary. 
+OONI_BINARY = "ooniprobe"   
 PROBE_TEST = "siteprobe.py"
 DNS_TEST = "dnscompare.py"
 TCP_TEST = "tcpconnect.py"
 PING_TEST = "ping.py"
 TRACEROUTE_TEST = "traceroute.py"
+TOR_SITE_URL = "https://www.torproject.org"
+TOR_BRIDGES_URL =  "bridges.torproject.org"
 TOR_MIRRORS = ["https://www.unicorncloud.org/public/torproject.org/", "https://mirror.ml/tor/", "https://www.oignon.net/", "https://tor.hackthissite.org/"]
 TOR_DIRECTORY_AUTHORITIES = [
                              { "86.59.21.38": 80 },
@@ -34,49 +35,19 @@ TOR_DIRECTORY_AUTHORITIES = [
                              { "154.35.32.5": 80 },
                              { "154.35.32.5": 443 }
                             ]
-
-class Analyser():
-        
-    def runTest(self, test, argv):
-        if len(argv) > 1:
-            args = (OONI_BINARY, "-n", test, argv[0], argv[1])
-        else:
-            args = (OONI_BINARY, "-n", test)
-        print "Running test %s" % test
-        popen = subprocess.Popen(args, stdout=subprocess.PIPE)
-        popen.wait()
-        output = popen.stdout.read()
-        return output
-        
-    def probeSite(self, args):
-        return self.runTest(PROBE_TEST, args)
-    
-    def compareDNS(self, args):
-        return self.runTest(DNS_TEST, args)
-        
-    def testTCPConnection(self, args):
-        return self.runTest(TCP_TEST, [])
-    
-    def ping(self, argv):
-        return self.runTest(PING_TEST, argv)
-
-    def traceroute(self, args):
-        return self.runTest(TRACEROUTE_TEST, args)
-
-    def siteReachable(self, url):
-        return "Site reachable" in self.probeSite(["-u", url])
     
 
 def probeTorSite():
-    if not analyser.siteReachable("https://www.torproject.org"):
+    if not siteReachable(TOR_SITE_URL):
         print "Tor site not reachable - running tests"
-        tests = [
-                    {  analyser.testTCPConnection: ["-t", "bridges.torproject.org"] },
-                    {  analyser.compareDNS: [] },
-                    {  analyser.probeSite: ["-u", choice(TOR_MIRRORS)] },
-                    {  analyser.testTCPConnection: [] }
-                ]
-        runTests(tests)
+        tests = TestCase(tests = [ test for test in [
+                                                    TCPTest(target = TOR_BRIDGES_URL),
+                                                    DNSTest(),
+                                                    SiteProbe(target=choice(TOR_MIRRORS)),
+                                                    TCPTest()
+                                                    ] ] )
+        tests.run()
+        tests.printResults()
     else:
         print "Tor site reachable"
          
@@ -86,17 +57,17 @@ def probeDirectoryAuthorities():
         port = server[host] 
         url = makeURL(host, port)
 
-        if analyser.siteReachable(url):
+        if siteReachable(url):
             print "Consensus successfully fetched"
             return
 
     print "Failed to fetch consensus - running tests"
-    tests = [ 
-                { analyser.ping: ["-f", "directory_authorities.txt"] },
-                { analyser.traceroute: ["-f", "directory_authorities.txt"] }
-            ]
-
-    runTests(tests)
+    tests = TestCase(tests = [ test for test in [
+                                                PingTest(),
+                                                Traceroute() 
+                                                ] ] )
+    tests.run()
+    tests.printResults()
 
 def makeURL(host, port):
     if port == 80: 
@@ -107,25 +78,15 @@ def makeURL(host, port):
          url = "http://%s:%s/tor/status-vote/current/consensus.z" % (host, str(port))
     return url 
 
-def runTests(tests):
-    for x in range(len(tests)):
-        test, args = randPop(tests)
-        test(args)
-        sleep(randint(SLEEP_INTERVAL[0], SLEEP_INTERVAL[1]))
-    
-def randPop(tests):
-    t = choice(tests)
-    test = t.keys()[0]
-    args = t[test]
-    tests.remove(t)
-    return test, args
+def siteReachable(url):
+    probe = SiteProbe(target=url)
+    probe.run()
+    return probe.status == "OK"
 
 if __name__ == "__main__":
-    analyser = Analyser()
-    tests = TestCase()
-    tests.addTests( [Test(TCP_TEST, [], OONI_BINARY)])
-    tests.addTests( [Test(PROBE_TEST, [], OONI_BINARY)])
-    tests.run()
-    tests.verifyResults()
-    #probeTorSite()               
-    #probeDirectoryAuthorities()
+    probeTorSite()               
+    probeDirectoryAuthorities()
+
+
+
+
