@@ -56,8 +56,14 @@ class PingTest(Test):
             self.errorMessage = "Host unreachable"
 
 class DNSTest(Test):
-    def __init__(self, testfile="dnscompare.py", target="torproject.org"):
+    def __init__(self, testfile="dnscompare.py", target="www.torproject.org"):
         super(DNSTest, self).__init__(testfile=testfile, args=["-t", target])
+        self.target = target
+
+class Traceroute(Test):
+    def __init__(self, testfile="traceroute.py", target=None, targetfile="directory_authorities.txt"):
+        args = ["-b", target] if target is not None else ["-f", targetfile]
+        super(Traceroute, self).__init__(testfile=testfile,args=args)
         self.target = target
 
 
@@ -89,7 +95,7 @@ class TestParser(object):
     
     def printResults(self):
         print "Test: %s" % self.test.testfile
-        if hasattr(self.test, "target"):
+        if hasattr(self.test, "target") and self.test.target is not None:
             print "Target: %s" % self.test.target
 
         results = self.test.getResults()
