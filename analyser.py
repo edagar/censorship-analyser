@@ -31,14 +31,18 @@ TOR_DIRECTORY_AUTHORITIES = [
 def probeTorSite():
     if not siteReachable(TOR_SITE_URL):
         print "Tor site not reachable - running tests"
-        tests = TestCase(tests = [ test for test in [
-                                                    TCPTest(target = TOR_BRIDGES_URL),
-                                                    DNSTest(),
-                                                    SiteProbe(target=choice(TOR_MIRRORS)),
-                                                    TCPTest()
-                                                    ] ] )
-        tests.run()
-        tests.printResults()
+        tests = [
+                TCPTest(target = TOR_BRIDGES_URL),
+                DNSTest(),
+                SiteProbe(target=choice(TOR_MIRRORS)),
+                TCPTest()
+                ]
+
+        testcase = TestCase()
+        map(lambda test: testcase.append(test), tests)
+        testcase.run()
+        testcase.printResults()
+
     else:
         print "Tor site reachable"
          
@@ -53,12 +57,15 @@ def probeDirectoryAuthorities():
             return
 
     print "Failed to fetch consensus - running tests"
-    tests = TestCase(tests = [ test for test in [
-                                                PingTest(),
-                                                Traceroute() 
-                                                ] ] )
-    tests.run()
-    tests.printResults()
+    tests = [
+            PingTest(),
+            Traceroute()
+            ]
+
+    testcase = TestCase()
+    map(lambda test: testcase.append(test), tests)
+    testcase.run()
+    testcase.printResults()
 
 def makeURL(host, port):
     if port == 80: 
