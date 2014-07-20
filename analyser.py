@@ -35,24 +35,35 @@ def probeDirectoryAuthorities():
             return
 
     print "Failed to fetch consensus - running tests"
-    tests = [
-            PingTest(),
-            Traceroute()
-            ]
 
-    testcase = TestCase()
-    map(lambda test: testcase.append(test), tests)
-    testcase.run()
-    testcase.printResults()
+    pingtests = TestCase()
+    traceroutes = TestCase()
+
+    for host in TOR_DIRECTORY_AUTHORITIES.keys():
+        pingtests.append(PingTest(target=host))
+
+    pingtests.run()
+    unreachable = pingtests.getFailed()
+
+    if unreachable:
+        print "%i of the directory servers (%s) didn't respond the our ping." % ( len(unreachable), ", ".join([test.target for test in unreachable]) )
+     
+        for host in unreachable:
+            traceroutes.append(Traceroute(target=host.target))
+        
+        traceroutes.run()
+        traceroutes.printResults()
+
+    pingtests.printResults()
 
 def makeURL(host, port):
-    if port == 80: 
+    if port == 80:
          url = "http://%s/tor/status-vote/current/consensus.z" % (host)
     elif port == 443:
          url = "https://%s/tor/status-vote/current/consensus.z" % (host)
     else:
          url = "http://%s:%s/tor/status-vote/current/consensus.z" % (host, str(port))
-    return url 
+    return url
 
 def siteReachable(url):
     probe = SiteProbe(target=url)
@@ -60,9 +71,7 @@ def siteReachable(url):
     return probe.status == "OK"
 
 if __name__ == "__main__":
-    probeTorSite()               
+    probeTorSite()
     probeDirectoryAuthorities()
-
-
 
 
