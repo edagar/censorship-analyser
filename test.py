@@ -120,6 +120,10 @@ class TestCase(list):
             test.printResults()
             print
 
+    def getFailed(self):
+        failed = [test for test in self if test.status != "OK"]
+        return failed
+
 def testCaseGenerator(seq):
     for x in range(len(seq)):
         test = choice(seq)
