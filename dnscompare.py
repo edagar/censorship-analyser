@@ -31,7 +31,14 @@ class DNSLookup(dnst.DNSTest):
                 for line in file:
                     self.expected_results.append(line.strip())
         else:
-            self.expected_results = ['38.229.72.14', '38.229.72.16', '82.195.75.101', '86.59.30.40', '93.95.227.222'] 
+            self.expected_results = [
+                                    '154.35.132.70',
+                                    '38.229.72.14',
+                                    '38.229.72.16',
+                                    '82.195.75.101',
+                                    '86.59.30.40',
+                                    '93.95.227.222'
+                                    ]
             
         self.report['expected_results'] = self.expected_results
         
