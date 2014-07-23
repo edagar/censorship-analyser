@@ -2,6 +2,8 @@ import subprocess
 from random import choice, randint
 from time import sleep
 
+from const import *
+
 class Test(object):
 
     def __init__(self, testfile, args=[]):
@@ -30,18 +32,18 @@ class Test(object):
                 }
 
 class SiteProbe(Test):
-    def __init__(self, testfile="siteprobe.py", target="https://www.torproject.org"):
+    def __init__(self, testfile=PROBE_TEST, target=TOR_SITE_URL):
         super(SiteProbe, self).__init__(testfile=testfile, args = ["-u", target])
         self.target = target
 
 class TCPTest(Test):
-    def __init__(self, testfile="tcpconnect.py", target="www.torproject.org"):
+    def __init__(self, testfile=TCP_TEST, target=TOR_DOMAIN):
         super(TCPTest, self).__init__(testfile=testfile, args=["-t", target])
         self.target = target
 
 class PingTest(Test):
-    def __init__(self, testfile="ping.py",target=None, targetfile="directory_authorities.txt"):
-        args = ["-t", target] if target is not None else ["-f", targetfile]
+    def __init__(self, testfile=PING_TEST,target=None):
+        args = ["-t", target] if target is not None else [] 
         super(PingTest, self).__init__(testfile=testfile, args=args)
         self.target = target
         self.packets = None
@@ -56,13 +58,13 @@ class PingTest(Test):
             self.errorMessage = "Host unreachable"
 
 class DNSTest(Test):
-    def __init__(self, testfile="dnscompare.py", target="www.torproject.org"):
+    def __init__(self, testfile=DNS_TEST, target=TOR_DOMAIN):
         super(DNSTest, self).__init__(testfile=testfile, args=["-t", target])
         self.target = target
 
 class Traceroute(Test):
-    def __init__(self, testfile="traceroute.py", target=None, targetfile="directory_authorities.txt"):
-        args = ["-b", target] if target is not None else ["-f", targetfile]
+    def __init__(self, testfile=TRACEROUTE_TEST, target=None):
+        args = ["-b", target] if target is not None else []
         super(Traceroute, self).__init__(testfile=testfile,args=args)
         self.target = target
 
@@ -105,7 +107,7 @@ class TestParser(object):
 
 
 class TestCase(list):
-    def __init__(self, tests=[], sleep_interval=(1,20)):
+    def __init__(self, tests=[], sleep_interval=SLEEP_INTERVAL):
         super(TestCase, self).__init__(tests)
         self.sleepInterval = sleep_interval
 
@@ -131,7 +133,7 @@ def testCaseGenerator(seq):
         yield test
 
 def runTest(test):
-    binary = "ooniprobe"
+    binary = OONI_BINARY
     args = [binary, "-n", test.testfile]
 
     if test.args:
