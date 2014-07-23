@@ -16,6 +16,8 @@ TRACEROUTE_TEST = "traceroute.py"
 
 TOR_SITE_URL = "https://www.torproject.org"
 
+TOR_DOMAIN = "torproject.org"
+
 TOR_BRIDGES_URL =  "bridges.torproject.org"
 
 TOR_MIRRORS = ["https://www.unicorncloud.org/public/torproject.org/", "https://mirror.ml/tor/", "https://www.oignon.net/", "https://tor.hackthissite.org/"]
