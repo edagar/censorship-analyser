@@ -37,8 +37,8 @@ class SiteProbe(Test):
         self.target = target
 
 class TCPTest(Test):
-    def __init__(self, testfile=TCP_TEST, target=TOR_DOMAIN):
-        super(TCPTest, self).__init__(testfile=testfile, args=["-t", target])
+    def __init__(self, testfile=TCP_TEST, target=TOR_DOMAIN, port="443"):
+        super(TCPTest, self).__init__(testfile=testfile, args=["-t", target, "-p", port])
         self.target = target
 
 class PingTest(Test):

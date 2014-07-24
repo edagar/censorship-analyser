@@ -23,7 +23,7 @@ class TCPConnect(tcpt.TCPTest):
             self.target = "www.torproject.org"
        
         if self.localOptions['port']:
-            self.targetPort = self.localOptions['port']
+            self.targetPort = int(self.localOptions['port'])
         else:
             self.targetPort = 443
 
