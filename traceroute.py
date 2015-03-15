@@ -67,7 +67,7 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s: %s" % (port, report))
                 self.report['hops_'+str(port)].append(report)
-            log.msg("TestStatus: [ OK ]")
+            self.report["TestStatus"] = "OK"
   
         try:
             dl = []
@@ -82,9 +82,8 @@ class TracerouteTest(scapyt.BaseScapyTest):
             return defer.DeferredList(dl)
 
         except Exception, e:
-            log.msg("TestStatus: [ FAILED ]")
-            log.exception(e)
-            log.msg("TestException: [ %s ]" % (e))
+            self.report["TestStatus"] = "FAILED"
+            self.report['TestException'] = '%s' % ( e.message )
 
     def test_udp_traceroute(self):
         """
@@ -103,6 +102,7 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s: %s" % (port, report))
                 self.report['hops_'+str(port)].append(report)
+                self.report["TestStatus"] = "OK"
         
         try:
             dl = []
@@ -118,9 +118,8 @@ class TracerouteTest(scapyt.BaseScapyTest):
             return defer.DeferredList(dl)
 
         except Exception, e:
-            log.msg("TestStatus: [ FAILED ]")
-            log.exception(e)
-            log.msg("TestException: [ %s ]" % (e))
+            self.report["TestStatus"] = "FAILED"
+            self.report['TestException'] = '%s' % ( e.message )
 
 
     def test_icmp_traceroute(self):
@@ -139,6 +138,7 @@ class TracerouteTest(scapyt.BaseScapyTest):
                 }
                 log.debug("%s" % (report))
                 self.report['hops'].append(report)
+                self.report["TestStatus"] = "OK"
 
         try:
             dl = []
@@ -150,8 +150,5 @@ class TracerouteTest(scapyt.BaseScapyTest):
             d.addCallback(finished)
             return d
         except Exception, e:
-            log.msg("TestStatus: [ FAILED ]")
-            log.exception(e)
-            log.msg("TestException: [ %s ]" % (e))
-
-
+            self.report["TestStatus"] = "FAILED"
+            self.report['TestException'] = '%s' % ( e.message )

@@ -69,14 +69,10 @@ class DNSLookup(dnst.DNSTest):
             
             if results:
                 if self.verify_results(results):
-                    self.report['dns_lookup_status'] = "success"
-                    self.report['tampering_found'] = "false"
-                    log.msg("TestStatus: [ OK ]")
+                    self.report['TestStatus'] = 'OK'
                 else:
-                    self.report['dns_lookup_status'] = "warning"
-                    self.report['tampering_found'] = "possibly"
-                    log.msg("TestStatus: [ FAILED ]")
-                    log.msg("TestException: [ unexpected results ]")
+                    self.report['TestStatus'] = 'FAILED'
+                    self.report['TestException'] = 'unexpected results'
                      
         
     @defer.inlineCallbacks
