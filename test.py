@@ -1,7 +1,9 @@
 import subprocess
 from random import choice, randint
 from time import sleep
+import yaml
 
+from ooni.otime import timestamp
 from const import *
 
 class Test(object):
@@ -13,14 +15,17 @@ class Test(object):
         self.status = None
         self.errorMessage = None
         self.parser = None
+        self.report = None
+        self.reportName = None
 
     def run(self):
+        self.reportName = "report-%s-%s.yamloo" % (self.testfile, timestamp())
         self.output = runTest(self)
         self.parseResults()
 
     def parseResults(self):
         self.parser = TestParser(self)
-        self.parser.parseOutput(self.output)
+        self.parser.parseReport()
 
     def printResults(self):
         self.parser.printResults()
@@ -48,14 +53,27 @@ class PingTest(Test):
         self.target = target
         self.packets = None
 
+    def parsePackets(self, report):
+        try:
+            return 'echo-reply' in report['ReceivedPackets'][0][0]['summary']
+        except Exception, e:
+            print e
+            return False
+
     def parseResults(self):
         self.parser = TestParser(self)
-        self.packets = self.parser.findValue("ReceivedPackets: ")
-        if "echo-reply" in self.packets:
-            self.status = "OK"
-        else:
-            self.status = "FAILED"
-            self.errorMessage = "Host unreachable"
+        self.parser.loadReport()
+
+        if self.report['TestStatus'] == 'OK':
+            self.packets = self.report['packets']
+
+            if self.parsePackets(self.report):
+                self.status = "OK"
+                return
+
+        self.status = "FAILED"
+        self.errorMessage = "Host unreachable"
+        raise TestException(self)
 
 class DNSTest(Test):
     def __init__(self, testfile=DNS_TEST, target=TOR_DOMAIN):
@@ -72,29 +90,24 @@ class Traceroute(Test):
 class TestParser(object):
     def __init__(self, test):
         self.test = test
-
-    def findValue(self, key):
-        """
-        The ooniprobe tests include simple key/value pairs
-        in their output, indicating the test results. 
-        
-        To avoid false positives, the format "key: [ VALUE ]"
-        is used. This method takes "key" as a parameter,
-        and returns VALUE.
-        """
-        output = self.test.output
-        if not key in output:
-            return "NOT FOUND"
-
-        start = output.find(key) + len(key)  
-        value = output[start:].split(" ]")[0][1:].strip()    
-        return value
-
-    def parseOutput(self, output):
-        self.test.status = self.findValue("TestStatus: ")
-        if not self.test.status == "OK":
-            self.test.errorMessage = self.findValue("TestException: ")
     
+    def loadReport(self):
+        with open(self.test.reportName, 'r') as f:
+            entries = yaml.safe_load_all(f)
+
+            headers = entries.next()
+            self.test.report = entries.next()
+
+
+    def parseReport(self):
+        self.loadReport()
+        self.test.status = self.test.report['TestStatus']
+
+        if not self.test.status == "OK":
+            self.test.errorMessage = self.test.report['TestException']
+            raise TestException(self.test)
+
+
     def printResults(self):
         print "Test: %s" % self.test.testfile
         if hasattr(self.test, "target") and self.test.target is not None:
@@ -113,9 +126,14 @@ class TestCase(list):
 
     def run(self):
         tests = testCaseGenerator(list(self))
-        for test in tests:
-            test.run()
-            sleep(randint(self.sleepInterval[0], self.sleepInterval[1]))
+
+        try:
+            [ test.run() for test in tests ]
+
+        except TestException, e:
+            print e
+
+        sleep(randint(self.sleepInterval[0], self.sleepInterval[1]))
 
     def printResults(self):
         for test in self:
@@ -123,8 +141,7 @@ class TestCase(list):
             print
 
     def getFailed(self):
-        failed = [test for test in self if test.status != "OK"]
-        return failed
+        return [test for test in self if test.status != "OK"]
 
 def testCaseGenerator(seq):
     for x in range(len(seq)):
@@ -134,7 +151,7 @@ def testCaseGenerator(seq):
 
 def runTest(test):
     binary = OONI_BINARY
-    args = [binary, "-n", test.testfile]
+    args = [binary, "-o", test.reportName, "-n", test.testfile]
 
     if test.args:
         args += test.args
@@ -145,3 +162,10 @@ def runTest(test):
 
     output = popen.stdout.read()
     return output
+
+class TestException(Exception):
+    def __init__(self, test):
+        self.testInstance = test
+
+    def __str__(self):
+        return "%s: %s  (%s)" % (self.testInstance.testfile, self.testInstance.status, self.testInstance.errorMessage)
