@@ -35,12 +35,13 @@ class TCPConnect(tcpt.TCPTest):
         A TCP connection to torproject.org port 443 is attempted
         """
         def got_response(response):
-            self.report['TestStatus'] = 'OK'
-            self.report['response'] = response
+            if response is not None:
+                self.report['TestStatus'] = 'OK'
+                self.report['response'] = response
 
         def connection_failed(failure):
-            self.report['TestException'] = '%s' % failure.getErrorMessage() 
             self.report['TestStatus'] = 'FAILED'
+            self.report['TestException'] = '%s' % failure.getErrorMessage() 
             failure.trap(ConnectionRefusedError)
 
         self.address = self.target
