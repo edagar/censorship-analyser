@@ -56,8 +56,7 @@ class PingTest(Test):
     def parsePackets(self, report):
         try:
             return 'echo-reply' in report['ReceivedPackets'][0][0]['summary']
-        except Exception, e:
-            print e
+        except:
             return False
 
     def parseResults(self):
@@ -127,13 +126,13 @@ class TestCase(list):
     def run(self):
         tests = testCaseGenerator(list(self))
 
-        try:
-            [ test.run() for test in tests ]
+        for test in tests:
+            try:
+                test.run()
+            except TestException, e:
+                print e
 
-        except TestException, e:
-            print e
-
-        sleep(randint(self.sleepInterval[0], self.sleepInterval[1]))
+            sleep(randint(self.sleepInterval[0], self.sleepInterval[1]))
 
     def printResults(self):
         for test in self:
