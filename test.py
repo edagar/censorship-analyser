@@ -4,10 +4,9 @@ from time import sleep
 import yaml
 
 from ooni.otime import timestamp
-from const import *
+import const
 
 class Test(object):
-
     def __init__(self, testfile, args=[]):
         self.testfile = testfile
         self.args = args
@@ -37,17 +36,17 @@ class Test(object):
                 }
 
 class SiteProbe(Test):
-    def __init__(self, testfile=PROBE_TEST, target=TOR_SITE_URL):
+    def __init__(self, testfile=const.PROBE_TEST, target=const.TOR_SITE_URL):
         super(SiteProbe, self).__init__(testfile=testfile, args = ["-u", target])
         self.target = target
 
 class TCPTest(Test):
-    def __init__(self, testfile=TCP_TEST, target=TOR_DOMAIN, port="443"):
+    def __init__(self, testfile=const.TCP_TEST, target=const.TOR_DOMAIN, port="443"):
         super(TCPTest, self).__init__(testfile=testfile, args=["-t", target, "-p", port])
         self.target = target
 
 class PingTest(Test):
-    def __init__(self, testfile=PING_TEST,target=None):
+    def __init__(self, testfile=const.PING_TEST,target=None):
         args = ["-t", target] if target is not None else [] 
         super(PingTest, self).__init__(testfile=testfile, args=args)
         self.target = target
@@ -75,12 +74,12 @@ class PingTest(Test):
         raise TestException(self)
 
 class DNSTest(Test):
-    def __init__(self, testfile=DNS_TEST, target=TOR_DOMAIN):
+    def __init__(self, testfile=const.DNS_TEST, target=const.TOR_DOMAIN):
         super(DNSTest, self).__init__(testfile=testfile, args=["-t", target])
         self.target = target
 
 class Traceroute(Test):
-    def __init__(self, testfile=TRACEROUTE_TEST, target=None):
+    def __init__(self, testfile=const.TRACEROUTE_TEST, target=None):
         args = ["-b", target] if target is not None else []
         super(Traceroute, self).__init__(testfile=testfile,args=args)
         self.target = target
@@ -119,7 +118,7 @@ class TestParser(object):
 
 
 class TestCase(list):
-    def __init__(self, tests=[], sleep_interval=SLEEP_INTERVAL):
+    def __init__(self, tests=[], sleep_interval=const.SLEEP_INTERVAL):
         super(TestCase, self).__init__(tests)
         self.sleepInterval = sleep_interval
 
@@ -149,7 +148,7 @@ def testCaseGenerator(seq):
         yield test
 
 def runTest(test):
-    binary = OONI_BINARY
+    binary = const.OONI_BINARY
     args = [binary, "-o", test.reportName, "-n", test.testfile]
 
     if test.args:

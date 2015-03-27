@@ -4,22 +4,21 @@ import subprocess
 from time import sleep
 from random import randint, choice
 
-from test import *
-from const import *
+import test
+import const
     
 
 def probeTorSite():
-    if not siteReachable(TOR_SITE_URL):
+    if not siteReachable(const.TOR_SITE_URL):
         print "Tor site not reachable - running tests"
         tests = [
-                TCPTest(target = TOR_BRIDGES_URL),
-                DNSTest(),
-                SiteProbe(target=choice(TOR_MIRRORS)),
-                TCPTest()
+                test.TCPTest(target = const.TOR_BRIDGES_URL),
+                test.DNSTest(),
+                test.SiteProbe(target=choice(const.TOR_MIRRORS)),
+                test.TCPTest()
                 ]
 
-        testcase = TestCase()
-        map(lambda test: testcase.append(test), tests)
+        testcase = test.TestCase(tests=tests)
         testcase.run()
         testcase.printResults()
 
@@ -27,7 +26,7 @@ def probeTorSite():
         print "Tor site reachable"
          
 def probeDirectoryAuthorities():
-    for host, port in TOR_DIRECTORY_AUTHORITIES.iteritems():
+    for host, port in const.TOR_DIRECTORY_AUTHORITIES.iteritems():
         url = makeURL(host, port)
 
         if siteReachable(url):
@@ -36,11 +35,11 @@ def probeDirectoryAuthorities():
 
     print "Failed to fetch consensus - running tests"
 
-    pingtests = TestCase()
-    traceroutes = TestCase()
+    pingtests = test.TestCase()
+    traceroutes = test.TestCase()
 
-    for host in TOR_DIRECTORY_AUTHORITIES.keys():
-        pingtests.append(PingTest(target=host))
+    for host in const.TOR_DIRECTORY_AUTHORITIES.keys():
+        pingtests.append(test.PingTest(target=host))
 
     pingtests.run()
     unreachable = pingtests.getFailed()
@@ -49,7 +48,7 @@ def probeDirectoryAuthorities():
         print "%i of the directory servers (%s) didn't respond the our ping." % ( len(unreachable), ", ".join([test.target for test in unreachable]) )
      
         for host in unreachable:
-            traceroutes.append(Traceroute(target=host.target))
+            traceroutes.append(test.Traceroute(target=host.target))
         
         traceroutes.run()
         traceroutes.printResults()
@@ -66,7 +65,7 @@ def makeURL(host, port):
     return url
 
 def siteReachable(url):
-    probe = SiteProbe(target=url)
+    probe = test.SiteProbe(target=url)
     probe.run()
     return probe.status == "OK"
 
