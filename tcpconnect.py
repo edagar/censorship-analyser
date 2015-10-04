@@ -4,12 +4,13 @@ from ooni.utils import log
 from ooni.templates import tcpt
 from twisted.python import usage
 
+
 class UsageOptions(usage.Options):
     optParameters = [
-                     ['target', 't', None, 'Specify a single host to test.'],
-                     ['port', 'p', None, 'Specify port.']
-                     ]
- 
+        ['target', 't', None, 'Specify a single host to test.'],
+        ['port', 'p', None, 'Specify port.']
+    ]
+
 
 class TCPConnect(tcpt.TCPTest):
     usageOptions = UsageOptions
@@ -21,7 +22,7 @@ class TCPConnect(tcpt.TCPTest):
             self.target = self.localOptions['target']
         else:
             self.target = "www.torproject.org"
-       
+
         if self.localOptions['port']:
             self.targetPort = int(self.localOptions['port'])
         else:
@@ -41,7 +42,7 @@ class TCPConnect(tcpt.TCPTest):
 
         def connection_failed(failure):
             self.report['TestStatus'] = 'FAILED'
-            self.report['TestException'] = '%s' % failure.getErrorMessage() 
+            self.report['TestException'] = '%s' % failure.getErrorMessage()
             failure.trap(ConnectionRefusedError)
 
         self.address = self.target
