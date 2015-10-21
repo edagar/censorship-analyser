@@ -6,11 +6,13 @@ import yaml
 from ooni.otime import timestamp
 import const
 
+
 class Test(object):
+
     def __init__(self, testfile, args=[]):
         self.testfile = testfile
         self.args = args
-        self.output = None 
+        self.output = None
         self.status = None
         self.errorMessage = None
         self.parser = None
@@ -31,23 +33,31 @@ class Test(object):
 
     def getResults(self):
         return {
-                "Status": self.status,
-                "ErrorMessage": self.errorMessage,
-                }
+            "Status": self.status,
+            "ErrorMessage": self.errorMessage,
+        }
+
 
 class SiteProbe(Test):
+
     def __init__(self, testfile=const.PROBE_TEST, target=const.TOR_SITE_URL):
-        super(SiteProbe, self).__init__(testfile=testfile, args = ["-u", target])
+        super(SiteProbe, self).__init__(testfile=testfile, args=["-u", target])
         self.target = target
+
 
 class TCPTest(Test):
-    def __init__(self, testfile=const.TCP_TEST, target=const.TOR_DOMAIN, port="443"):
-        super(TCPTest, self).__init__(testfile=testfile, args=["-t", target, "-p", port])
+
+    def __init__(self, testfile=const.TCP_TEST,
+                 target=const.TOR_DOMAIN, port="443"):
+        super(TCPTest, self).__init__(
+            testfile=testfile, args=["-t", target, "-p", port])
         self.target = target
 
+
 class PingTest(Test):
-    def __init__(self, testfile=const.PING_TEST,target=None):
-        args = ["-t", target] if target is not None else [] 
+
+    def __init__(self, testfile=const.PING_TEST, target=None):
+        args = ["-t", target] if target is not None else []
         super(PingTest, self).__init__(testfile=testfile, args=args)
         self.target = target
         self.packets = None
@@ -73,29 +83,33 @@ class PingTest(Test):
         self.errorMessage = "Host unreachable"
         raise TestException(self)
 
+
 class DNSTest(Test):
+
     def __init__(self, testfile=const.DNS_TEST, target=const.TOR_DOMAIN):
         super(DNSTest, self).__init__(testfile=testfile, args=["-t", target])
         self.target = target
 
+
 class Traceroute(Test):
+
     def __init__(self, testfile=const.TRACEROUTE_TEST, target=None):
         args = ["-b", target] if target is not None else []
-        super(Traceroute, self).__init__(testfile=testfile,args=args)
+        super(Traceroute, self).__init__(testfile=testfile, args=args)
         self.target = target
 
 
 class TestParser(object):
+
     def __init__(self, test):
         self.test = test
-    
+
     def loadReport(self):
         with open(self.test.reportName, 'r') as f:
             entries = yaml.safe_load_all(f)
 
             headers = entries.next()
             self.test.report = entries.next()
-
 
     def parseReport(self):
         self.loadReport()
@@ -104,7 +118,6 @@ class TestParser(object):
         if not self.test.status == "OK":
             self.test.errorMessage = self.test.report['TestException']
             raise TestException(self.test)
-
 
     def printResults(self):
         print "Test: %s" % self.test.testfile
@@ -118,6 +131,7 @@ class TestParser(object):
 
 
 class TestCase(list):
+
     def __init__(self, tests=[], sleep_interval=const.SLEEP_INTERVAL):
         super(TestCase, self).__init__(tests)
         self.sleepInterval = sleep_interval
@@ -141,11 +155,13 @@ class TestCase(list):
     def getFailed(self):
         return [test for test in self if test.status != "OK"]
 
+
 def testCaseGenerator(seq):
     for x in range(len(seq)):
         test = choice(seq)
         seq.remove(test)
         yield test
+
 
 def runTest(test):
     binary = const.OONI_BINARY
@@ -153,7 +169,7 @@ def runTest(test):
 
     if test.args:
         args += test.args
-        
+
     print "Running test %s" % test.testfile
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
@@ -161,9 +177,13 @@ def runTest(test):
     output = popen.stdout.read()
     return output
 
+
 class TestException(Exception):
+
     def __init__(self, test):
         self.testInstance = test
 
     def __str__(self):
-        return "%s: %s  (%s)" % (self.testInstance.testfile, self.testInstance.status, self.testInstance.errorMessage)
+        return "%s: %s  (%s)" % (self.testInstance.testfile,
+                                 self.testInstance.status,
+                                 self.testInstance.errorMessage)

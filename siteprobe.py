@@ -6,21 +6,23 @@ from twisted.python import usage
 from twisted.internet import defer
 import random
 
+
 class UsageOptions(usage.Options):
     optParameters = [
-                     ['url', 'u', None, 'Specify a single URL to test.']
-                     ]
-    
+        ['url', 'u', None, 'Specify a single URL to test.']
+    ]
+
+
 class WebsiteProbe(httpt.HTTPTest):
     name = "WebsiteProbeTest"
     author = "Tobias Rang"
     version = 0.1
-    
+
     usageOptions = UsageOptions
-    
+
     inputFile = ['file', 'f', None,
                  'Input file containing urls to probe']
-        
+
     def setUp(self):
         """
         Check for inputs.
@@ -34,7 +36,7 @@ class WebsiteProbe(httpt.HTTPTest):
 
         self.headers = {'User-Agent': [random.choice(userAgents)]}
         self.report['site_to_probe'] = self.url
-    
+
     @defer.inlineCallbacks
     def test_probe_site(self):
         """
@@ -43,14 +45,14 @@ class WebsiteProbe(httpt.HTTPTest):
         """
         try:
             response = yield self.doRequest(self.url, method="GET",
-                use_tor=False, headers=self.headers)
+                                            use_tor=False, headers=self.headers)
         except Exception, e:
             self.report['TestStatus'] = 'FAILED'
-            self.report['TestException'] = '%s' % ( e.message )
+            self.report['TestException'] = '%s' % (e.message)
 
         if not response:
             self.report['Site_reachable'] = "False"
- 
+
         else:
             self.report['Site_reachable'] = "True"
             self.report['TestStatus'] = 'OK'
